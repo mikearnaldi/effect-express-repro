@@ -1,6 +1,6 @@
 import * as Schema from '@effect/schema/Schema';
 import * as bodyParser from 'body-parser';
-import {Effect, Layer, Option} from 'effect';
+import {Effect, Option} from 'effect';
 import * as Exp from './express';
 import * as Todo from './todo';
 
@@ -8,7 +8,7 @@ import * as Todo from './todo';
 // Application
 // =============================================================================
 
-const server = Effect.all([
+export const server = Effect.all([
   Exp.use((req, res, next) =>
     Effect.sync(() => bodyParser.json()(req, res, next))
   ),
@@ -85,14 +85,3 @@ const server = Effect.all([
     );
   }),
 ]);
-
-const MainLive = Exp.Live('127.0.0.1', 8888).pipe(
-  Layer.merge(Todo.TodoRepository.Live)
-);
-
-server.pipe(
-  Effect.zipRight(Effect.never),
-  Effect.provide(MainLive),
-  Effect.tapErrorCause(Effect.logError),
-  Effect.runFork
-);
